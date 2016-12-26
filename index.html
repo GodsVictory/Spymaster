@@ -138,8 +138,8 @@
     setInterval(resize, 500);
 
     function resize() {
-      $('#topBar').css('height', document.body.clientHeight * .05 + "px");
-      $('#topBar *').css('line-height', document.body.clientHeight * .05 + "px");
+      $('#topBar').css('height', document.body.clientHeight * .075 + "px");
+      $('#topBar *').css('line-height', $('#topBar').height() + "px");
       $("*").css('font-size', document.body.clientWidth * .025 + "px");
       $("#game").css('height', document.body.clientHeight - $('#topBar').height() + "px");
       $("#game").css('top', $('#topBar').height() + "px");
