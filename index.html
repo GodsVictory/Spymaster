@@ -140,7 +140,7 @@
     function resize() {
       $('#topBar').css('height', document.body.clientHeight * .05 + "px");
       $('#topBar *').css('line-height', document.body.clientHeight * .05 + "px");
-      $("*").css('font-size', $('#topBar').height() / 2 + "px");
+      $("*").css('font-size', document.body.clientWidth * .025 + "px");
       $("#game").css('height', document.body.clientHeight - $('#topBar').height() + "px");
       $("#game").css('top', $('#topBar').height() + "px");
     }
