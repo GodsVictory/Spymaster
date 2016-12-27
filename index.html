@@ -7,17 +7,20 @@
   <meta name="viewport" content="width=device-width" />
   <script src="jquery-3.1.1.slim.min.js"></script>
   <script src="seedrandom.min.js"></script>
+  <script src="velocity.min.js"></script>
+  <script src="qurl.js"></script>
   <link href="https://fonts.googleapis.com/css?family=Fredoka+One" rel="stylesheet">
   <script>
     var unusedArray = [];
     var cellArray = ["a0", "a1", "a2", "a3", "a4", "b0", "b1", "b2", "b3", "b4", "c0", "c1", "c2", "c3", "c4", "d0", "d1", "d2", "d3", "d4", "e0", "e1", "e2", "e3", "e4"];
-    var blueArray = [];
-    var redArray = [];
-    var ranNum, ranLet, red, blue, black, spymaster = false;
+    var colorArray = [];
+    var url = Qurl.create();
+    var spymaster = false;
     var defaultColor = "#b4ecd0";
 
     function setSeed() {
       Math.seedrandom($('#seed').val());
+      url.query('seed',$('#seed').val());
       resetGame();
     }
 
@@ -25,10 +28,11 @@
       $("#seed").focus(function () {
         $(this).select();
       });
-      resize()
-      setSeed();
+      if (url.query('seed'))
+        $('#seed').val(url.query('seed'));
+      resize();
       getRow();
-      resetGame();
+      setSeed();
     });
 
     function resetGame() {
@@ -37,10 +41,10 @@
       getColors();
       getCount();
       $('td').each(function () {
-        $(this).css('background-color', defaultColor);
-      });
-      $('td').each(function () {
-        $(this).css('opacity', 1);
+        $(this).velocity('stop').css({
+          'background-color': defaultColor,
+          'opacity': 1
+        });
       });
     }
 
@@ -52,16 +56,49 @@
         });
       } else {
         spymaster = true;
-        colorSpymaster();
+        for (key in colorArray) {
+          $('#' + key).css('background-color', colorArray[key].color);
+        };
       }
     }
 
     function fade(id) {
-      var opacity = $('#' + id).css("opacity");
-      if (opacity == 0.1)
-        $('#' + id).css("opacity", "1");
-      else
-        $('#' + id).css("opacity", "0.1");
+      if (colorArray[id].flipped) {
+        if (spymaster)
+          var color = colorArray[id].color;
+        else
+          var color = defaultColor;
+        $('#' + id).velocity('stop', true).velocity({
+          rotateX: 0
+        }, {
+          duration: 100,
+          easing: 'linear'
+        }).css({
+          'background-color': color,
+          'opacity': 1
+        });
+        colorArray[id].flipped = false;
+      } else {
+        $('#' + id).velocity('stop', true).velocity({
+          rotateX: 2070
+        }, {
+          duration: 3000,
+          easing: 'easeInCubic',
+          complete: function () {
+            $('#' + id).css('background-color', colorArray[id].color);
+          }
+        }).velocity({
+          rotateX: 0
+        }, {
+          duration: 100,
+          easing: 'linear'
+        }).velocity({
+          opacity: .1
+        }, {
+          duration: 3000
+        });
+        colorArray[id].flipped = true;
+      }
       getCount();
     }
 
@@ -84,14 +121,15 @@
     }
 
     function getColors() {
-      blueArray = [];
-      redArray = [];
       unusedArray = cellArray.slice(0);
       var ranCol = getRandomInt(8, 9);
       for (i = 0; i < ranCol; i++) {
         var ran = getRandomInt(0, unusedArray.length - 1);
         var select = unusedArray.splice(ran, 1);
-        blueArray.push(select[0]);
+        colorArray[select[0]] = {
+          color: 'LightBlue',
+          flipped: false
+        };
       }
 
       if (ranCol == 8) var ranCol = 9;
@@ -100,40 +138,39 @@
       for (i = 0; i < ranCol; i++) {
         var ran = getRandomInt(0, unusedArray.length - 1);
         var select = unusedArray.splice(ran, 1);
-        redArray.push(select[0]);
+        colorArray[select[0]] = {
+          color: 'IndianRed',
+          flipped: false
+        };
       }
 
       var ran = getRandomInt(0, unusedArray.length - 1);
       var select = unusedArray.splice(ran, 1);
-      black = select[0];
+      colorArray[select[0]] = {
+        color: 'DimGrey',
+        flipped: false
+      };
+
+      unusedArray.forEach(function (val) {
+        colorArray[val] = {
+          color: 'LightYellow',
+          flipped: false
+        };
+      });
+
     }
 
     function getCount() {
       var blueCount = 0,
         redCount = 0;
-      blueArray.forEach(function (val) {
-        if ($('#' + val).css("opacity") == 1)
+      for (key in colorArray) {
+        if (colorArray[key].color == "LightBlue")
           blueCount++;
-      });
-      redArray.forEach(function (val) {
-        if ($('#' + val).css("opacity") == 1)
+        if (colorArray[key].color == "IndianRed")
           redCount++;
-      });
+      }
       $('#blueCount').text(blueCount);
       $('#redCount').text(redCount);
-    }
-
-    function colorSpymaster() {
-      blueArray.forEach(function (val) {
-        $('#' + val).css('background-color', 'LightBlue');
-      });
-      redArray.forEach(function (val) {
-        $('#' + val).css('background-color', 'IndianRed');
-      });
-      unusedArray.forEach(function (val) {
-        $('#' + val).css('background-color', 'LightYellow');
-      });
-      $('#' + black).css('background-color', 'DimGrey');
     }
 
     setInterval(resize, 500);
