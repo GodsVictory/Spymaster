@@ -98,21 +98,19 @@
             if (colorArray[id].flipped) return;
             flipping = true;
             $('#' + id).velocity({
-                rotateX: 2070
+                rotateX: 2160
             }, {
                 duration: 3000
                 , easing: 'easeInCubic'
                 , complete: function () {
-                    $('#' + id).css('background-color', colorArray[id].color);
+                    $('#' + id).css({
+                        'background-color': colorArray[id].color
+                        , 'transform': 'rotateX(0deg)'
+                    });
                     colorArray[id].flipped = true;
                     flipping = false;
                     getCount();
                 }
-            }).velocity({
-                rotateX: 0
-            }, {
-                duration: 100
-                , easing: 'linear'
             }).velocity({
                 opacity: .1
             }, {
