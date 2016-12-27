@@ -16,11 +16,12 @@
     var colorArray = [];
     var url = Qurl.create();
     var spymaster = false;
+    var flipping = false;
     var defaultColor = "#b4ecd0";
 
     function setSeed() {
       Math.seedrandom($('#seed').val());
-      url.query('seed',$('#seed').val());
+      url.query('seed', $('#seed').val());
       resetGame();
     }
 
@@ -62,50 +63,53 @@
       }
     }
 
-    function fade(id) {
-      if (colorArray[id].flipped) {
-        if (spymaster)
-          var color = colorArray[id].color;
-        else
-          var color = defaultColor;
-        $('#' + id).velocity('stop', true).velocity({
+    function stopAll() {
+      for (key in colorArray) {
+        $('#' + key).velocity('stop', true).velocity({
           rotateX: 0
         }, {
           duration: 100,
           easing: 'linear'
-        }).css({
-          'background-color': color,
-          'opacity': 1
         });
-        colorArray[id].flipped = false;
-      } else {
-        $('#' + id).velocity('stop', true).velocity({
-          rotateX: 2070
-        }, {
-          duration: 3000,
-          easing: 'easeInCubic',
-          complete: function () {
-            $('#' + id).css('background-color', colorArray[id].color);
-          }
-        }).velocity({
-          rotateX: 0
-        }, {
-          duration: 100,
-          easing: 'linear'
-        }).velocity({
-          opacity: .1
-        }, {
-          duration: 3000
-        });
-        colorArray[id].flipped = true;
       }
-      getCount();
     }
+
+    function fade(id) {
+      if (flipping) {
+        stopAll();
+        flipping = false;
+        return;
+      }
+      flipping = true;
+      $('#' + id).velocity('stop', true).velocity({
+        rotateX: 2070
+      }, {
+        duration: 3000,
+        easing: 'easeInCubic',
+        complete: function () {
+          $('#' + id).css('background-color', colorArray[id].color);
+          flipping = false;
+          getCount();
+        }
+      }).velocity({
+        rotateX: 0
+      }, {
+        duration: 100,
+        easing: 'linear'
+      }).velocity({
+        opacity: .1
+      }, {
+        duration: 3000
+      });
+    }
+
+
 
     function getRow(letter) {
       cellArray.forEach(function (val, index) {
         if (index % 5 == 0)
           $('#game').append("<tr></tr>");
+
         $('#game tr:last').append('<td id="' + val + '" style="background-color:' + defaultColor + ';" onclick="fade(this.id)"></td>');
       });
     }
@@ -127,8 +131,7 @@
         var ran = getRandomInt(0, unusedArray.length - 1);
         var select = unusedArray.splice(ran, 1);
         colorArray[select[0]] = {
-          color: 'LightBlue',
-          flipped: false
+          color: 'LightBlue'
         };
       }
 
@@ -139,22 +142,19 @@
         var ran = getRandomInt(0, unusedArray.length - 1);
         var select = unusedArray.splice(ran, 1);
         colorArray[select[0]] = {
-          color: 'IndianRed',
-          flipped: false
+          color: 'IndianRed'
         };
       }
 
       var ran = getRandomInt(0, unusedArray.length - 1);
       var select = unusedArray.splice(ran, 1);
       colorArray[select[0]] = {
-        color: 'DimGrey',
-        flipped: false
+        color: 'DimGrey'
       };
 
       unusedArray.forEach(function (val) {
         colorArray[val] = {
-          color: 'LightYellow',
-          flipped: false
+          color: 'LightYellow'
         };
       });
 
@@ -169,6 +169,12 @@
         if (colorArray[key].color == "IndianRed")
           redCount++;
       }
+      $('td').each(function () {
+        if ($(this).css('background-color') == 'rgb(173, 216, 230)')
+          blueCount--;
+        if ($(this).css('background-color') == 'rgb(205, 92, 92)')
+          redCount--;
+      });
       $('#blueCount').text(blueCount);
       $('#redCount').text(redCount);
     }
