@@ -1,291 +1,279 @@
 <html>
 
 <head>
-  <title>Spymaster</title>
-  <link rel="icon" href="favicon.ico" type="image/x-icon">
-  <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' name='viewport' />
-  <meta name="viewport" content="width=device-width" />
-  <script src="jquery-3.1.1.slim.min.js"></script>
-  <script src="seedrandom.min.js"></script>
-  <script src="velocity.min.js"></script>
-  <script src="qurl.js"></script>
-  <link href="https://fonts.googleapis.com/css?family=Fredoka+One" rel="stylesheet">
-  <script>
-    var unusedArray = [];
-    var cellArray = ["a0", "a1", "a2", "a3", "a4", "b0", "b1", "b2", "b3", "b4", "c0", "c1", "c2", "c3", "c4", "d0", "d1", "d2", "d3", "d4", "e0", "e1", "e2", "e3", "e4"];
-    var colorArray = [];
-    var url = Qurl.create();
-    var spymaster = false;
-    var flipping = false;
-    var defaultColor = "#b4ecd0";
+    <title>Spymaster</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' name='viewport' />
+    <meta name="viewport" content="width=device-width" />
+    <script src="jquery-3.1.1.slim.min.js"></script>
+    <script src="seedrandom.min.js"></script>
+    <script src="velocity.min.js"></script>
+    <script src="qurl.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Fredoka+One" rel="stylesheet">
+    <script>
+        var unusedArray = [];
+        var cellArray = ["a0", "a1", "a2", "a3", "a4", "b0", "b1", "b2", "b3", "b4", "c0", "c1", "c2", "c3", "c4", "d0", "d1", "d2", "d3", "d4", "e0", "e1", "e2", "e3", "e4"];
+        var colorArray = [];
+        var url = Qurl.create();
+        var spymaster = false;
+        var flipping = false;
+        var defaultColor = "#b4ecd0";
 
-    function setSeed() {
-      Math.seedrandom($('#seed').val());
-      url.query('seed', $('#seed').val());
-      resetGame();
-    }
-
-    $(document).ready(function () {
-      $("#seed").focus(function () {
-        $(this).select();
-      });
-      if (url.query('seed'))
-        $('#seed').val(url.query('seed'));
-      resize();
-      getRow();
-      setSeed();
-    });
-
-    function resetGame() {
-      spymaster = false;
-      setWords();
-      getColors();
-      getCount();
-      $('td').each(function () {
-        $(this).velocity('stop').css({
-          'background-color': defaultColor,
-          'opacity': 1
-        });
-      });
-    }
-
-    function toggleSpymaster() {
-      if (spymaster) {
-        spymaster = false;
-        for (key in colorArray) {
-          if (!colorArray[key].flipped)
-            $('#' + key).css('background-color', defaultColor);
-        };
-      } else {
-        spymaster = true;
-        for (key in colorArray) {
-          $('#' + key).css('background-color', colorArray[key].color);
-        };
-      }
-      getCount();
-    }
-
-    function stopAll() {
-      for (key in colorArray) {
-        $('#' + key).velocity('stop', true).velocity({
-          rotateX: 0
-        }, {
-          duration: 100,
-          easing: 'linear'
-        });
-      }
-    }
-
-    function fade(id) {
-      if (spymaster) {
-        if ($('#' + id).css('opacity') == 1) {
-          $('#' + id).css('opacity', .1);
-          colorArray[id].flipped = true;
-        } else {
-          $('#' + id).css('opacity', 1);
-          colorArray[id].flipped = false;
+        function setSeed() {
+            Math.seedrandom($('#seed').val());
+            url.query('seed', $('#seed').val());
+            resetGame();
         }
-        $('#' + id).css('background-color', colorArray[id].color);
-        getCount();
-        return;
-      }
+        $(document).ready(function () {
+            $("#seed").focus(function () {
+                $(this).select();
+            });
+            if (url.query('seed')) $('#seed').val(url.query('seed'));
+            resize();
+            getRow();
+            setSeed();
+        });
 
-      if (flipping) {
-        stopAll();
-        flipping = false;
-        return;
-      }
-      
-      if (colorArray[id].flipped)
-        return;
-      
-      flipping = true;
-      $('#' + id).velocity('stop', true).velocity({
-        rotateX: 2070
-      }, {
-        duration: 3000,
-        easing: 'easeInCubic',
-        complete: function () {
-          $('#' + id).css('background-color', colorArray[id].color);
-          colorArray[id].flipped = true;
-          flipping = false;
-          getCount();
+        function resetGame() {
+            spymaster = false;
+            setWords();
+            getColors();
+            getCount();
+            $('td').each(function () {
+                $(this).velocity('stop').css({
+                    'background-color': defaultColor
+                    , 'opacity': 1
+                });
+            });
         }
-      }).velocity({
-        rotateX: 0
-      }, {
-        duration: 100,
-        easing: 'linear'
-      }).velocity({
-        opacity: .1
-      }, {
-        duration: 3000
-      });
-    }
 
-    function getRow(letter) {
-      cellArray.forEach(function (val, index) {
-        if (index % 5 == 0)
-          $('#game').append("<tr></tr>");
-        $('#game tr:last').append('<td id="' + val + '" style="background-color:' + defaultColor + ';" onclick="fade(this.id)"></td>');
-      });
-    }
+        function toggleSpymaster() {
+            if (spymaster) {
+                spymaster = false;
+                for (key in colorArray) {
+                    if (!colorArray[key].flipped) $('#' + key).css('background-color', defaultColor);
+                };
+            }
+            else {
+                spymaster = true;
+                for (key in colorArray) {
+                    $('#' + key).css('background-color', colorArray[key].color);
+                };
+            }
+            getCount();
+        }
 
-    function getRandomInt(min, max) {
-      return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
+        function stopAll() {
+            for (key in colorArray) {
+                $('#' + key).velocity('stop', true).velocity({
+                    rotateX: 0
+                    , rotateY: 0
+                    , scale: 1
+                }, {
+                    duration: 100
+                    , easing: 'linear'
+                });
+            }
+        }
 
-    function setWords() {
-      $("td").each(function () {
-        $(this).text(words[getRandomInt(0, words.length - 1)]);
-      });
-    }
+        function fade(id) {
+            if (spymaster) {
+                if ($('#' + id).css('opacity') == 1) {
+                    $('#' + id).css('opacity', .1);
+                    colorArray[id].flipped = true;
+                }
+                else {
+                    $('#' + id).css('opacity', 1);
+                    colorArray[id].flipped = false;
+                }
+                $('#' + id).css('background-color', colorArray[id].color);
+                getCount();
+                return;
+            }
+            if (flipping) {
+                stopAll();
+                flipping = false;
+                return;
+            }
+            if (colorArray[id].flipped) return;
+            flipping = true;
+            $('#' + id).velocity({
+                rotateX: 2070
+            }, {
+                duration: 3000
+                , easing: 'easeInCubic'
+                , complete: function () {
+                    $('#' + id).css('background-color', colorArray[id].color);
+                    colorArray[id].flipped = true;
+                    flipping = false;
+                    getCount();
+                }
+            }).velocity({
+                rotateX: 0
+            }, {
+                duration: 100
+                , easing: 'linear'
+            }).velocity({
+                opacity: .1
+            }, {
+                duration: 3000
+                , delay: 500
+            });
+        }
 
-    function getColors() {
-      unusedArray = cellArray.slice(0);
-      var ranCol = getRandomInt(8, 9);
-      for (i = 0; i < ranCol; i++) {
-        var ran = getRandomInt(0, unusedArray.length - 1);
-        var select = unusedArray.splice(ran, 1);
-        colorArray[select[0]] = {
-          color: 'LightBlue',
-          flipped: false
-        };
-      }
+        function getRow(letter) {
+            cellArray.forEach(function (val, index) {
+                if (index % 5 == 0) $('#game').append("<tr></tr>");
+                $('#game tr:last').append('<td id="' + val + '" style="background-color:' + defaultColor + ';" onclick="fade(this.id)"></td>');
+            });
+        }
 
-      if (ranCol == 8) var ranCol = 9;
-      else var ranCol = 8;
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
 
-      for (i = 0; i < ranCol; i++) {
-        var ran = getRandomInt(0, unusedArray.length - 1);
-        var select = unusedArray.splice(ran, 1);
-        colorArray[select[0]] = {
-          color: 'IndianRed',
-          flipped: false
-        };
-      }
+        function setWords() {
+            $("td").each(function () {
+                $(this).text(words[getRandomInt(0, words.length - 1)]);
+            });
+        }
 
-      var ran = getRandomInt(0, unusedArray.length - 1);
-      var select = unusedArray.splice(ran, 1);
-      colorArray[select[0]] = {
-        color: 'DimGrey',
-        flipped: false
-      };
+        function getColors() {
+            unusedArray = cellArray.slice(0);
+            var ranCol = getRandomInt(8, 9);
+            for (i = 0; i < ranCol; i++) {
+                var ran = getRandomInt(0, unusedArray.length - 1);
+                var select = unusedArray.splice(ran, 1);
+                colorArray[select[0]] = {
+                    color: 'LightBlue'
+                    , flipped: false
+                };
+            }
+            if (ranCol == 8) var ranCol = 9;
+            else var ranCol = 8;
+            for (i = 0; i < ranCol; i++) {
+                var ran = getRandomInt(0, unusedArray.length - 1);
+                var select = unusedArray.splice(ran, 1);
+                colorArray[select[0]] = {
+                    color: 'IndianRed'
+                    , flipped: false
+                };
+            }
+            var ran = getRandomInt(0, unusedArray.length - 1);
+            var select = unusedArray.splice(ran, 1);
+            colorArray[select[0]] = {
+                color: 'DimGrey'
+                , flipped: false
+            };
+            unusedArray.forEach(function (val) {
+                colorArray[val] = {
+                    color: 'LightYellow'
+                    , flipped: false
+                };
+            });
+        }
 
-      unusedArray.forEach(function (val) {
-        colorArray[val] = {
-          color: 'LightYellow',
-          flipped: false
-        };
-      });
+        function getCount() {
+            var blueCount = 0
+                , redCount = 0;
+            for (key in colorArray) {
+                if (colorArray[key].color == "LightBlue" && !colorArray[key].flipped) blueCount++;
+                if (colorArray[key].color == "IndianRed" && !colorArray[key].flipped) redCount++;
+            }
+            $('#blueCount').text(blueCount);
+            $('#redCount').text(redCount);
+        }
+        setTimeout(resize, 500);
 
-    }
-
-    function getCount() {
-      var blueCount = 0,
-        redCount = 0;
-      for (key in colorArray) {
-        if (colorArray[key].color == "LightBlue" && !colorArray[key].flipped)
-          blueCount++;
-        if (colorArray[key].color == "IndianRed" && !colorArray[key].flipped)
-          redCount++;
-      }
-      $('#blueCount').text(blueCount);
-      $('#redCount').text(redCount);
-    }
-
-    setTimeout(resize, 500);
-    function resize() {
-      $('#topBar').css('height', document.body.clientHeight * .075 + "px");
-      $('#topBar *').css('line-height', $('#topBar').height() + "px");
-      $("*").css('font-size', document.body.clientWidth * .025 + "px");
-      $("#game").css('height', document.body.clientHeight - $('#topBar').height() + "px");
-      $("#game").css('top', $('#topBar').height() + "px");
-      setTimeout(resize, 500);
-
-    }
-
-    var words = ["account", "achiever", "acoustics", "act", "action", "activity", "actor", "addition", "adjustment", "advertisement", "advice", "aftermath", "afternoon", "afterthought", "agreement", "air", "airplane", "airport", "alarm", "amount", "amusement", "anger", "angle", "animal", "answer", "ant", "ants", "apparatus", "apparel", "apple", "apples", "appliance", "approval", "arch", "argument", "arithmetic", "arm", "army", "art", "attack", "attempt", "attention", "attraction", "aunt", "authority", "babies", "baby", "back", "badge", "bag", "bait", "balance", "ball", "balloon", "balls", "banana", "band", "base", "baseball", "basin", "basket", "basketball", "bat", "bath", "battle", "bead", "beam", "bean", "bear", "bears", "beast", "bed", "bedroom", "beds", "bee", "beef", "beetle", "beggar", "beginner", "behavior", "belief", "believe", "bell", "bells", "berry", "bike", "bikes", "bird", "birds", "birth", "birthday", "bit", "bite", "blade", "blood", "blow", "board", "boat", "boats", "body", "bomb", "bone", "book", "books", "boot", "border", "bottle", "boundary", "box", "boy", "boys", "brain", "brake", "branch", "brass", "bread", "breakfast", "breath", "brick", "bridge", "brother", "brothers", "brush", "bubble", "bucket", "building", "bulb", "bun", "burn", "burst", "bushes", "business", "butter", "button", "cabbage", "cable", "cactus", "cake", "cakes", "calculator", "calendar", "camera", "camp", "can", "cannon", "canvas", "cap", "caption", "car", "card", "care", "carpenter", "carriage", "cars", "cart", "cast", "cat", "cats", "cattle", "cause", "cave", "celery", "cellar", "cemetery", "cent", "chain", "chair", "chairs", "chalk", "chance", "change", "channel", "cheese", "cherries", "cherry", "chess", "chicken", "chickens", "children", "chin", "church", "circle", "clam", "class", "clock", "clocks", "cloth", "cloud", "clouds", "clover", "club", "coach", "coal", "coast", "coat", "cobweb", "coil", "collar", "color", "comb", "comfort", "committee", "company", "comparison", "competition", "condition", "connection", "control", "cook", "copper", "copy", "cord", "cork", "corn", "cough", "country", "cover", "cow", "cows", "crack", "cracker", "crate", "crayon", "cream", "creator", "creature", "credit", "crib", "crime", "crook", "crow", "crowd", "crown", "crush", "cry", "cub", "cup", "current", "curtain", "curve", "cushion", "dad", "daughter", "day", "death", "debt", "decision", "deer", "degree", "design", "desire", "desk", "destruction", "detail", "development", "digestion", "dime", "dinner", "dinosaurs", "direction", "dirt", "discovery", "discussion", "disease", "disgust", "distance", "distribution", "division", "dock", "doctor", "dog", "dogs", "doll", "dolls", "donkey", "door", "downtown", "drain", "drawer", "dress", "drink", "driving", "drop", "drug", "drum", "duck", "ducks", "dust", "ear", "earth", "earthquake", "edge", "education", "effect", "egg", "eggnog", "eggs", "elbow", "end", "engine", "error", "event", "example", "exchange", "existence", "expansion", "experience", "expert", "eye", "eyes", "face", "fact", "fairies", "fall", "family", "fan", "fang", "farm", "farmer", "father", "father", "faucet", "fear", "feast", "feather", "feeling", "feet", "fiction", "field", "fifth", "fight", "finger", "finger", "fire", "fireman", "fish", "flag", "flame", "flavor", "flesh", "flight", "flock", "floor", "flower", "flowers", "fly", "fog", "fold", "food", "foot", "force", "fork", "form", "fowl", "frame", "friction", "friend", "friends", "frog", "frogs", "front", "fruit", "fuel", "furniture", "alley", "game", "garden", "gate", "geese", "ghost", "giants", "giraffe", "girl", "girls", "glass", "glove", "glue", "goat", "gold", "goldfish", "good-bye", "goose", "government", "governor", "grade", "grain", "grandfather", "grandmother", "grape", "grass", "grip", "ground", "group", "growth", "guide", "guitar", "gun", "hair", "haircut", "hall", "hammer", "hand", "hands", "harbor", "harmony", "hat", "hate", "head", "health", "hearing", "heart", "heat", "help", "hen", "hill", "history", "hobbies", "hole", "holiday", "home", "honey", "hook", "hope", "horn", "horse", "horses", "hose", "hospital", "hot", "hour", "house", "houses", "humor", "hydrant", "ice", "icicle", "idea", "impulse", "income", "increase", "industry", "ink", "insect", "instrument", "insurance", "interest", "invention", "iron", "island", "jail", "jam", "jar", "jeans", "jelly", "jellyfish", "jewel", "join", "joke", "journey", "judge", "juice", "jump", "kettle", "key", "kick", "kiss", "kite", "kitten", "kittens", "kitty", "knee", "knife", "knot", "knowledge", "laborer", "lace", "ladybug", "lake", "lamp", "land", "language", "laugh", "lawyer", "lead", "leaf", "learning", "leather", "leg", "legs", "letter", "letters", "lettuce", "level", "library", "lift", "light", "limit", "line", "linen", "lip", "liquid", "list", "lizards", "loaf", "lock", "locket", "look", "loss", "love", "low", "lumber", "lunch", "lunchroom", "machine", "magic", "maid", "mailbox", "man", "manager", "map", "marble", "mark", "market", "mask", "mass", "match", "meal", "measure", "meat", "meeting", "memory", "men", "metal", "mice", "middle", "milk", "mind", "mine", "minister", "mint", "minute", "mist", "mitten", "mom", "money", "monkey", "month", "moon", "morning", "mother", "motion", "mountain", "mouth", "move", "muscle", "music", "nail", "name", "nation", "neck", "need", "needle", "nerve", "nest", "net", "news", "night", "noise", "north", "nose", "note", "notebook", "number", "nut", "oatmeal", "observation", "ocean", "offer", "office", "oil", "operation", "opinion", "orange", "oranges", "order", "organization", "ornament", "oven", "owl", "owner", "page", "pail", "pain", "paint", "pan", "pancake", "paper", "parcel", "parent", "park", "part", "partner", "party", "passenger", "paste", "patch", "payment", "peace", "pear", "pen", "pencil", "person", "pest", "pet", "pets", "pickle", "picture", "pie", "pies", "pig", "pigs", "pin", "pipe", "pizzas", "place", "plane", "planes", "plant", "plantation", "plants", "plastic", "plate", "play", "playground", "pleasure", "plot", "plough", "pocket", "point", "poison", "police", "polish", "pollution", "popcorn", "porter", "position", "pot", "potato", "powder", "power", "price", "print", "prison", "process", "produce", "profit", "property", "prose", "protest", "pull", "pump", "punishment", "purpose", "push", "quarter", "quartz", "queen", "question", "quicksand", "quiet", "quill", "quilt", "quince", "quiver", "rabbit", "rabbits", "rail", "railway", "rain", "rainstorm", "rake", "range", "rat", "rate", "ray", "reaction", "reading", "reason", "receipt", "recess", "record", "regret", "relation", "religion", "representative", "request", "respect", "rest", "reward", "rhythm", "rice", "riddle", "rifle", "ring", "rings", "river", "road", "robin", "rock", "rod", "roll", "roof", "room", "root", "rose", "route", "rub", "rule", "run", "sack", "sail", "salt", "sand", "scale", "scarecrow", "scarf", "scene", "scent", "school", "science", "scissors", "screw", "sea", "seashore", "seat", "secretary", "seed", "selection", "self", "sense", "servant", "shade", "shake", "shame", "shape", "sheep", "sheet", "shelf", "ship", "shirt", "shock", "shoe", "shoes", "shop", "show", "side", "sidewalk", "sign", "silk", "silver", "sink", "sister", "sisters", "size", "skate", "skin", "skirt", "sky", "slave", "sleep", "sleet", "slip", "slope", "smash", "smell", "smile", "smoke", "snail", "snails", "snake", "snakes", "sneeze", "snow", "soap", "society", "sock", "soda", "sofa", "son", "song", "songs", "sort", "sound", "soup", "space", "spade", "spark", "spiders", "sponge", "spoon", "spot", "spring", "spy", "square", "squirrel", "stage", "stamp", "star", "start", "statement", "station", "steam", "steel", "stem", "step", "stew", "stick", "sticks", "stitch", "stocking", "stomach", "stone", "stop", "store", "story", "stove", "stranger", "straw", "stream", "street", "stretch", "string", "structure", "substance", "sugar", "suggestion", "suit", "summer", "sun", "support", "surprise", "sweater", "swim", "swing", "system", "table", "tail", "talk", "tank", "taste", "tax", "teaching", "team", "teeth", "temper", "tendency", "tent", "territory", "test", "texture", "theory", "thing", "things", "thought", "thread", "thrill", "throat", "throne", "thumb", "thunder", "ticket", "tiger", "time", "tin", "title", "toad", "toe", "toes", "tomatoes", "tongue", "tooth", "toothbrush", "toothpaste", "top", "touch", "town", "toy", "toys", "trade", "trail", "train", "trains", "tramp", "transport", "tray", "treatment", "tree", "trees", "trick", "trip", "trouble", "trousers", "truck", "trucks", "tub", "turkey", "turn", "twig", "twist", "umbrella", "uncle", "underwear", "unit", "use", "vacation", "value", "van", "vase", "vegetable", "veil", "vein", "verse", "vessel", "vest", "view", "visitor", "voice", "volcano", "volleyball", "voyage", "walk", "wall", "war", "wash", "waste", "watch", "water", "wave", "waves", "wax", "way", "wealth", "weather", "week", "weight", "wheel", "whip", "whistle", "wilderness", "wind", "window", "wine", "wing", "winter", "wire", "wish", "woman", "women", "wood", "wool", "word", "work", "worm", "wound", "wren", "wrench", "wrist", "writer", "writing", "yak", "yam", "yard", "yarn", "year", "yoke", "zebra", "zephyr", "zinc", "zipper", "zoo"];
-  </script>
-  <style>
-    body {
-      padding: 0px;
-      margin: 0px;
-    }
-    
-    * {
-      font: 0px Fredoka One;
-      cursor: pointer;
-      -webkit-touch-callout: none;
-      -webkit-user-select: none;
-      -khtml-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
-      -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-    }
-    
-    td {
-      color: black;
-      text-align: center;
-      width: 20%;
-      height: 20%;
-    }
-    
-    #seed {
-      position: absolute;
-      padding-left: 5px;
-      height: 100%;
-      width: 35%;
-      border: 0px;
-      outline-width: 0;
-    }
-    
-    #spymaster {
-      text-align: right;
-      padding-right: 5px;
-      position: absolute;
-      right: 0px;
-      height: 100%;
-    }
-    
-    #count {
-      text-align: center;
-      position: absolute;
-      width: 100%;
-      z-index: -1;
-    }
-    
-    #topBar {
-      position: absolute;
-      top: 0px;
-      width: 100%;
-      height: 30px;
-    }
-    
-    #blueCount {
-      color: LightBlue;
-    }
-    
-    #redCount {
-      color: IndianRed;
-    }
-    
-    #game {
-      position: absolute;
-      width: 100%;
-      top: 30px;
-    }
-  </style>
+        function resize() {
+            $('#topBar').css('height', document.body.clientHeight * .075 + "px");
+            $('#topBar *').css('line-height', $('#topBar').height() + "px");
+            $("*").css('font-size', document.body.clientWidth * .025 + "px");
+            $("#game").css('height', document.body.clientHeight - $('#topBar').height() + "px");
+            $("#game").css('top', $('#topBar').height() + "px");
+            setTimeout(resize, 500);
+        }
+        var words = ["account", "achiever", "acoustics", "act", "action", "activity", "actor", "addition", "adjustment", "advertisement", "advice", "aftermath", "afternoon", "afterthought", "agreement", "air", "airplane", "airport", "alarm", "amount", "amusement", "anger", "angle", "animal", "answer", "ant", "ants", "apparatus", "apparel", "apple", "apples", "appliance", "approval", "arch", "argument", "arithmetic", "arm", "army", "art", "attack", "attempt", "attention", "attraction", "aunt", "authority", "babies", "baby", "back", "badge", "bag", "bait", "balance", "ball", "balloon", "balls", "banana", "band", "base", "baseball", "basin", "basket", "basketball", "bat", "bath", "battle", "bead", "beam", "bean", "bear", "bears", "beast", "bed", "bedroom", "beds", "bee", "beef", "beetle", "beggar", "beginner", "behavior", "belief", "believe", "bell", "bells", "berry", "bike", "bikes", "bird", "birds", "birth", "birthday", "bit", "bite", "blade", "blood", "blow", "board", "boat", "boats", "body", "bomb", "bone", "book", "books", "boot", "border", "bottle", "boundary", "box", "boy", "boys", "brain", "brake", "branch", "brass", "bread", "breakfast", "breath", "brick", "bridge", "brother", "brothers", "brush", "bubble", "bucket", "building", "bulb", "bun", "burn", "burst", "bushes", "business", "butter", "button", "cabbage", "cable", "cactus", "cake", "cakes", "calculator", "calendar", "camera", "camp", "can", "cannon", "canvas", "cap", "caption", "car", "card", "care", "carpenter", "carriage", "cars", "cart", "cast", "cat", "cats", "cattle", "cause", "cave", "celery", "cellar", "cemetery", "cent", "chain", "chair", "chairs", "chalk", "chance", "change", "channel", "cheese", "cherries", "cherry", "chess", "chicken", "chickens", "children", "chin", "church", "circle", "clam", "class", "clock", "clocks", "cloth", "cloud", "clouds", "clover", "club", "coach", "coal", "coast", "coat", "cobweb", "coil", "collar", "color", "comb", "comfort", "committee", "company", "comparison", "competition", "condition", "connection", "control", "cook", "copper", "copy", "cord", "cork", "corn", "cough", "country", "cover", "cow", "cows", "crack", "cracker", "crate", "crayon", "cream", "creator", "creature", "credit", "crib", "crime", "crook", "crow", "crowd", "crown", "crush", "cry", "cub", "cup", "current", "curtain", "curve", "cushion", "dad", "daughter", "day", "death", "debt", "decision", "deer", "degree", "design", "desire", "desk", "destruction", "detail", "development", "digestion", "dime", "dinner", "dinosaurs", "direction", "dirt", "discovery", "discussion", "disease", "disgust", "distance", "distribution", "division", "dock", "doctor", "dog", "dogs", "doll", "dolls", "donkey", "door", "downtown", "drain", "drawer", "dress", "drink", "driving", "drop", "drug", "drum", "duck", "ducks", "dust", "ear", "earth", "earthquake", "edge", "education", "effect", "egg", "eggnog", "eggs", "elbow", "end", "engine", "error", "event", "example", "exchange", "existence", "expansion", "experience", "expert", "eye", "eyes", "face", "fact", "fairies", "fall", "family", "fan", "fang", "farm", "farmer", "father", "father", "faucet", "fear", "feast", "feather", "feeling", "feet", "fiction", "field", "fifth", "fight", "finger", "finger", "fire", "fireman", "fish", "flag", "flame", "flavor", "flesh", "flight", "flock", "floor", "flower", "flowers", "fly", "fog", "fold", "food", "foot", "force", "fork", "form", "fowl", "frame", "friction", "friend", "friends", "frog", "frogs", "front", "fruit", "fuel", "furniture", "alley", "game", "garden", "gate", "geese", "ghost", "giants", "giraffe", "girl", "girls", "glass", "glove", "glue", "goat", "gold", "goldfish", "good-bye", "goose", "government", "governor", "grade", "grain", "grandfather", "grandmother", "grape", "grass", "grip", "ground", "group", "growth", "guide", "guitar", "gun", "hair", "haircut", "hall", "hammer", "hand", "hands", "harbor", "harmony", "hat", "hate", "head", "health", "hearing", "heart", "heat", "help", "hen", "hill", "history", "hobbies", "hole", "holiday", "home", "honey", "hook", "hope", "horn", "horse", "horses", "hose", "hospital", "hot", "hour", "house", "houses", "humor", "hydrant", "ice", "icicle", "idea", "impulse", "income", "increase", "industry", "ink", "insect", "instrument", "insurance", "interest", "invention", "iron", "island", "jail", "jam", "jar", "jeans", "jelly", "jellyfish", "jewel", "join", "joke", "journey", "judge", "juice", "jump", "kettle", "key", "kick", "kiss", "kite", "kitten", "kittens", "kitty", "knee", "knife", "knot", "knowledge", "laborer", "lace", "ladybug", "lake", "lamp", "land", "language", "laugh", "lawyer", "lead", "leaf", "learning", "leather", "leg", "legs", "letter", "letters", "lettuce", "level", "library", "lift", "light", "limit", "line", "linen", "lip", "liquid", "list", "lizards", "loaf", "lock", "locket", "look", "loss", "love", "low", "lumber", "lunch", "lunchroom", "machine", "magic", "maid", "mailbox", "man", "manager", "map", "marble", "mark", "market", "mask", "mass", "match", "meal", "measure", "meat", "meeting", "memory", "men", "metal", "mice", "middle", "milk", "mind", "mine", "minister", "mint", "minute", "mist", "mitten", "mom", "money", "monkey", "month", "moon", "morning", "mother", "motion", "mountain", "mouth", "move", "muscle", "music", "nail", "name", "nation", "neck", "need", "needle", "nerve", "nest", "net", "news", "night", "noise", "north", "nose", "note", "notebook", "number", "nut", "oatmeal", "observation", "ocean", "offer", "office", "oil", "operation", "opinion", "orange", "oranges", "order", "organization", "ornament", "oven", "owl", "owner", "page", "pail", "pain", "paint", "pan", "pancake", "paper", "parcel", "parent", "park", "part", "partner", "party", "passenger", "paste", "patch", "payment", "peace", "pear", "pen", "pencil", "person", "pest", "pet", "pets", "pickle", "picture", "pie", "pies", "pig", "pigs", "pin", "pipe", "pizzas", "place", "plane", "planes", "plant", "plantation", "plants", "plastic", "plate", "play", "playground", "pleasure", "plot", "plough", "pocket", "point", "poison", "police", "polish", "pollution", "popcorn", "porter", "position", "pot", "potato", "powder", "power", "price", "print", "prison", "process", "produce", "profit", "property", "prose", "protest", "pull", "pump", "punishment", "purpose", "push", "quarter", "quartz", "queen", "question", "quicksand", "quiet", "quill", "quilt", "quince", "quiver", "rabbit", "rabbits", "rail", "railway", "rain", "rainstorm", "rake", "range", "rat", "rate", "ray", "reaction", "reading", "reason", "receipt", "recess", "record", "regret", "relation", "religion", "representative", "request", "respect", "rest", "reward", "rhythm", "rice", "riddle", "rifle", "ring", "rings", "river", "road", "robin", "rock", "rod", "roll", "roof", "room", "root", "rose", "route", "rub", "rule", "run", "sack", "sail", "salt", "sand", "scale", "scarecrow", "scarf", "scene", "scent", "school", "science", "scissors", "screw", "sea", "seashore", "seat", "secretary", "seed", "selection", "self", "sense", "servant", "shade", "shake", "shame", "shape", "sheep", "sheet", "shelf", "ship", "shirt", "shock", "shoe", "shoes", "shop", "show", "side", "sidewalk", "sign", "silk", "silver", "sink", "sister", "sisters", "size", "skate", "skin", "skirt", "sky", "slave", "sleep", "sleet", "slip", "slope", "smash", "smell", "smile", "smoke", "snail", "snails", "snake", "snakes", "sneeze", "snow", "soap", "society", "sock", "soda", "sofa", "son", "song", "songs", "sort", "sound", "soup", "space", "spade", "spark", "spiders", "sponge", "spoon", "spot", "spring", "spy", "square", "squirrel", "stage", "stamp", "star", "start", "statement", "station", "steam", "steel", "stem", "step", "stew", "stick", "sticks", "stitch", "stocking", "stomach", "stone", "stop", "store", "story", "stove", "stranger", "straw", "stream", "street", "stretch", "string", "structure", "substance", "sugar", "suggestion", "suit", "summer", "sun", "support", "surprise", "sweater", "swim", "swing", "system", "table", "tail", "talk", "tank", "taste", "tax", "teaching", "team", "teeth", "temper", "tendency", "tent", "territory", "test", "texture", "theory", "thing", "things", "thought", "thread", "thrill", "throat", "throne", "thumb", "thunder", "ticket", "tiger", "time", "tin", "title", "toad", "toe", "toes", "tomatoes", "tongue", "tooth", "toothbrush", "toothpaste", "top", "touch", "town", "toy", "toys", "trade", "trail", "train", "trains", "tramp", "transport", "tray", "treatment", "tree", "trees", "trick", "trip", "trouble", "trousers", "truck", "trucks", "tub", "turkey", "turn", "twig", "twist", "umbrella", "uncle", "underwear", "unit", "use", "vacation", "value", "van", "vase", "vegetable", "veil", "vein", "verse", "vessel", "vest", "view", "visitor", "voice", "volcano", "volleyball", "voyage", "walk", "wall", "war", "wash", "waste", "watch", "water", "wave", "waves", "wax", "way", "wealth", "weather", "week", "weight", "wheel", "whip", "whistle", "wilderness", "wind", "window", "wine", "wing", "winter", "wire", "wish", "woman", "women", "wood", "wool", "word", "work", "worm", "wound", "wren", "wrench", "wrist", "writer", "writing", "yak", "yam", "yard", "yarn", "year", "yoke", "zebra", "zephyr", "zinc", "zipper", "zoo"];
+    </script>
+    <style>
+        body {
+            padding: 0px;
+            margin: 0px;
+        }
+        
+        * {
+            font: 0px Fredoka One;
+            cursor: pointer;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        }
+        
+        td {
+            color: black;
+            text-align: center;
+            width: 20%;
+            height: 20%;
+        }
+        
+        #seed {
+            position: absolute;
+            padding-left: 5px;
+            height: 100%;
+            width: 35%;
+            border: 0px;
+            outline-width: 0;
+        }
+        
+        #spymaster {
+            text-align: right;
+            padding-right: 5px;
+            position: absolute;
+            right: 0px;
+            height: 100%;
+        }
+        
+        #count {
+            text-align: center;
+            position: absolute;
+            width: 100%;
+            z-index: -1;
+        }
+        
+        #topBar {
+            position: absolute;
+            top: 0px;
+            width: 100%;
+            height: 30px;
+        }
+        
+        #blueCount {
+            color: LightBlue;
+        }
+        
+        #redCount {
+            color: IndianRed;
+        }
+        
+        #game {
+            position: absolute;
+            width: 100%;
+            top: 30px;
+        }
+    </style>
 </head>
 
 <body>
-  <div id="topBar">
-    <input type="text" id="seed" onkeyup="setSeed()" placeholder="Seed..." value="Seed..." />
-    <div id="count"><span id="blueCount"></span>&nbsp;&nbsp;&nbsp;<span id="redCount"></span></div>
-    <div id="spymaster" onclick="toggleSpymaster()">Spymaster</div>
-  </div>
-  <table id="game" cellpadding="0"> </table>
+    <div id="topBar">
+        <input type="text" id="seed" onkeyup="setSeed()" placeholder="Seed..." value="Seed..." />
+        <div id="count"><span id="blueCount"></span>&nbsp;&nbsp;&nbsp;<span id="redCount"></span></div>
+        <div id="spymaster" onclick="toggleSpymaster()">Spymaster</div>
+    </div>
+    <table id="game" cellpadding="0"> </table>
 </body>
 
 </html>
