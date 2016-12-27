@@ -78,12 +78,14 @@
 
     function fade(id) {
       if (spymaster) {
-        if ($('#' + id).css('opacity') == 1)
+        if ($('#' + id).css('opacity') == 1) {
           $('#' + id).css('opacity', .1);
-        else
+          colorArray[id].flipped = true;
+        } else {
           $('#' + id).css('opacity', 1);
+          colorArray[id].flipped = false;
+        }
         $('#' + id).css('background-color', colorArray[id].color);
-        colorArray[id].flipped = true;
         getCount();
         return;
       }
@@ -93,8 +95,10 @@
         flipping = false;
         return;
       }
+      
       if (colorArray[id].flipped)
         return;
+      
       flipping = true;
       $('#' + id).velocity('stop', true).velocity({
         rotateX: 2070
@@ -118,8 +122,6 @@
         duration: 3000
       });
     }
-
-
 
     function getRow(letter) {
       cellArray.forEach(function (val, index) {
@@ -183,24 +185,11 @@
       var blueCount = 0,
         redCount = 0;
       for (key in colorArray) {
-        if (colorArray[key].color == "LightBlue")
+        if (colorArray[key].color == "LightBlue" && !colorArray[key].flipped)
           blueCount++;
-        if (colorArray[key].color == "IndianRed")
+        if (colorArray[key].color == "IndianRed" && !colorArray[key].flipped)
           redCount++;
       }
-      $('td').each(function () {
-        if (spymaster) {
-          if ($(this).css('background-color') == 'rgb(173, 216, 230)' && $(this).css('opacity') == .1)
-            blueCount--;
-          if ($(this).css('background-color') == 'rgb(205, 92, 92)' && $(this).css('opacity') == .1)
-            redCount--;
-        } else {
-          if ($(this).css('background-color') == 'rgb(173, 216, 230)')
-            blueCount--;
-          if ($(this).css('background-color') == 'rgb(205, 92, 92)')
-            redCount--;
-        }
-      });
       $('#blueCount').text(blueCount);
       $('#redCount').text(redCount);
     }
@@ -212,7 +201,6 @@
       $("*").css('font-size', document.body.clientWidth * .025 + "px");
       $("#game").css('height', document.body.clientHeight - $('#topBar').height() + "px");
       $("#game").css('top', $('#topBar').height() + "px");
-      getCount();
       setTimeout(resize, 500);
 
     }
