@@ -37,6 +37,9 @@
       getColors();
       getCount();
       $('td').each(function () {
+        $(this).css('background-color', defaultColor);
+      });
+      $('td').each(function () {
         $(this).css('opacity', 1);
       });
     }
