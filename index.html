@@ -7,7 +7,6 @@
     <meta name="viewport" content="width=device-width" />
     <script src="jquery-3.1.1.slim.min.js"></script>
     <script src="seedrandom.min.js"></script>
-    <script src="velocity.min.js"></script>
     <script src="qurl.js"></script>
     <link href="https://fonts.googleapis.com/css?family=Fredoka+One" rel="stylesheet">
     <script>
@@ -40,7 +39,7 @@
             getColors();
             getCount();
             $('td').each(function () {
-                $(this).velocity('stop').css({
+                $(this).css({
                     'background-color': defaultColor
                     , 'opacity': 1
                 });
@@ -63,19 +62,6 @@
             getCount();
         }
 
-        function stopAll() {
-            for (key in colorArray) {
-                $('#' + key).velocity('stop', true).velocity({
-                    rotateX: 0
-                    , rotateY: 0
-                    , scale: 1
-                }, {
-                    duration: 100
-                    , easing: 'linear'
-                });
-            }
-        }
-
         function fade(id) {
             if (spymaster) {
                 if ($('#' + id).css('opacity') == 1) {
@@ -90,33 +76,30 @@
                 getCount();
                 return;
             }
-            if (flipping) {
-                stopAll();
-                flipping = false;
-                return;
-            }
             if (colorArray[id].flipped) return;
-            flipping = true;
-            $('#' + id).velocity({
-                rotateX: 2160
-            }, {
-                duration: 3000
-                , easing: 'easeInCubic'
-                , complete: function () {
-                    $('#' + id).css({
-                        'background-color': colorArray[id].color
-                        , 'transform': 'rotateX(0deg)'
-                    });
-                    colorArray[id].flipped = true;
-                    flipping = false;
-                    getCount();
-                }
-            }).velocity({
-                opacity: .1
-            }, {
-                duration: 3000
-                , delay: 500
-            });
+            if (colorArray[id].flipping) {
+              colorArray[id].flipping = false;
+              clearInterval(colorArray[id].cd);
+              $('#' + id).text(colorArray[id].word);
+              return;
+            }
+            colorArray[id].flipping = true;
+            colorArray[id].word = $('#' + id).text();
+            $('#' + id).text("3");
+            colorArray[id].cd = setInterval(function() {
+              $('#' + id).text(parseInt($('#' + id).text())-1);
+              if (parseInt($('#' + id).text()) == 0) {
+                clearInterval(colorArray[id].cd);
+                $('#' + id).text(colorArray[id].word);
+                $('#' + id).css({'background-color': colorArray[id].color});
+                colorArray[id].flipping = false;
+                getCount();
+                colorArray[id].flipped = true;
+                setInterval(function() {
+                  $('#' + id).css('opacity', '.1');
+                }, 2000);
+              }
+            }, 1000);
         }
 
         function getRow(letter) {
