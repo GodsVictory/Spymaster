@@ -93,9 +93,9 @@
                 $('#' + id).text(colorArray[id].word);
                 $('#' + id).css({'background-color': colorArray[id].color});
                 colorArray[id].flipping = false;
-                getCount();
                 colorArray[id].flipped = true;
-                setInterval(function() {
+                getCount();
+                setTimeout(function() {
                   $('#' + id).css('opacity', '.1');
                 }, 2000);
               }
