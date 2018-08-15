@@ -34,6 +34,11 @@
         });
 
         function resetGame() {
+            for (key in colorArray) {
+                clearInterval(colorArray[key].cd);
+                clearTimeout(colorArray[key].hide);
+                colorArray[key].flipping = false;
+            }
             spymaster = false;
             setWords();
             getColors();
@@ -95,7 +100,7 @@
                 colorArray[id].flipping = false;
                 colorArray[id].flipped = true;
                 getCount();
-                setTimeout(function() {
+                colorArray[id].hide = setTimeout(function() {
                   $('#' + id).css('opacity', '.1');
                 }, 2000);
               }
