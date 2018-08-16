@@ -11,18 +11,13 @@
   <link href="https://fonts.googleapis.com/css?family=Fredoka+One" rel="stylesheet">
   <script>
   var unusedArray = [];
+  var usedArray = [];
   var cellArray = ["a0", "a1", "a2", "a3", "a4", "b0", "b1", "b2", "b3", "b4", "c0", "c1", "c2", "c3", "c4", "d0", "d1", "d2", "d3", "d4", "e0", "e1", "e2", "e3", "e4"];
-  var colorArray = [];
+  var tileArray = [];
   var url = Qurl.create();
   var spymaster = false;
-  var flipping = false;
   var defaultColor = "#b4ecd0";
 
-  function setSeed() {
-    Math.seedrandom($('#seed').val());
-    url.query('seed', $('#seed').val());
-    resetGame();
-  }
   $(document).ready(function() {
     $("#seed").focus(function() {
       $(this).select();
@@ -30,75 +25,85 @@
     if (url.query('seed')) $('#seed').val(url.query('seed'));
     resize();
     getRow();
-    setSeed();
+    resetGame();
   });
 
   function resetGame() {
-    for (key in colorArray) {
-      clearInterval(colorArray[key].cd);
-      clearTimeout(colorArray[key].hide);
-      colorArray[key].flipping = false;
+    for (id in tileArray) {
+      clearInterval(tileArray[id].cd);
+      clearTimeout(tileArray[id].hide);
+      tileArray[id].flipping = false;
     }
-    spymaster = false;
-    setWords();
-    getColors();
-    getCount();
     $('td').each(function() {
       $(this).css({
         'background-color': defaultColor,
         'opacity': 1
       });
     });
+    spymaster = false;
+    setSeed();
+    setWords();
+    getColors();
+    getCount();
+  }
+
+  function setSeed() {
+    Math.seedrandom($('#seed').val());
+    url.query('seed', $('#seed').val());
   }
 
   function toggleSpymaster() {
     if (spymaster) {
       spymaster = false;
-      for (key in colorArray) {
-        if (!colorArray[key].flipped) $('#' + key).css('background-color', defaultColor);
+      for (id in tileArray) {
+        if (!tileArray[id].flipped) $('#' + id).css('background-color', defaultColor);
       };
     } else {
       spymaster = true;
-      for (key in colorArray) {
-        $('#' + key).css('background-color', colorArray[key].color);
+      for (id in tileArray) {
+        $('#' + id).css('background-color', tileArray[id].color);
       };
     }
-    getCount();
   }
 
   function fade(id) {
     if (spymaster) {
       if ($('#' + id).css('opacity') == 1) {
         $('#' + id).css('opacity', .1);
-        colorArray[id].flipped = true;
+        tileArray[id].flipped = true;
       } else {
         $('#' + id).css('opacity', 1);
-        colorArray[id].flipped = false;
+        tileArray[id].flipped = false;
       }
-      $('#' + id).css('background-color', colorArray[id].color);
+      $('#' + id).css('background-color', tileArray[id].color);
       getCount();
       return;
     }
-    if (colorArray[id].flipped) return;
-    if (colorArray[id].flipping) {
-      colorArray[id].flipping = false;
-      clearInterval(colorArray[id].cd);
-      $('#' + id).text(colorArray[id].word);
+
+    if (tileArray[id].flipped) return;
+
+    if (tileArray[id].flipping) {
+      tileArray[id].flipping = false;
+      clearInterval(tileArray[id].cd);
+      $('#' + id).text(tileArray[id].word);
+      $('#' + id).css({ 'background-color': defaultColor });
       return;
     }
-    colorArray[id].flipping = true;
-    colorArray[id].word = $('#' + id).text();
+
+    tileArray[id].flipping = true;
+    tileArray[id].word = $('#' + id).text();
     $('#' + id).text("3");
-    colorArray[id].cd = setInterval(function() {
+    $('#' + id).css({ 'background-color': '#6beca5' });
+    tileArray[id].cd = setInterval(function() {
       $('#' + id).text(parseInt($('#' + id).text()) - 1);
       if (parseInt($('#' + id).text()) == 0) {
-        clearInterval(colorArray[id].cd);
-        $('#' + id).text(colorArray[id].word);
-        $('#' + id).css({ 'background-color': colorArray[id].color });
-        colorArray[id].flipping = false;
-        colorArray[id].flipped = true;
+        clearInterval(tileArray[id].cd);
+        $('#' + id).text(tileArray[id].word);
+        $('#' + id).css({ 'background-color': tileArray[id].color });
+        tileArray[id].flipping = false;
+        tileArray[id].flipped = true;
         getCount();
-        colorArray[id].hide = setTimeout(function() {
+        tileArray[id].hide = setTimeout(function() {
           $('#' + id).css('opacity', '.1');
         }, 2000);
       }
@@ -118,39 +123,48 @@
 
   function setWords() {
     $("td").each(function() {
-      $(this).text(words[getRandomInt(0, words.length - 1)]);
+      var word = words[getRandomInt(0, words.length - 1)];
+      while ($.inArray(word, usedArray) > -1)
+        word = words[getRandomInt(0, words.length - 1)];
+      usedArray.push(word);
+      $(this).text(word);
     });
   }
 
   function getColors() {
     unusedArray = cellArray.slice(0);
-    var ranCol = getRandomInt(8, 9);
-    for (i = 0; i < ranCol; i++) {
-      var ran = getRandomInt(0, unusedArray.length - 1);
-      var select = unusedArray.splice(ran, 1);
-      colorArray[select[0]] = {
-        color: 'LightBlue',
+    var toggleColor = getRandomInt(0, 1);
+    var blueCount = 0;
+    var redCount = 0;
+
+    for (i = 0; i < 17; i++) {
+      var select = unusedArray.splice(getRandomInt(0, unusedArray.length - 1), 1);
+
+      if (toggleColor == 0) {
+        toggleColor = 1;
+        blueCount++;
+        color = 'LightBlue';
+      } else {
+        toggleColor = 0;
+        redCount++;
+        color = 'IndianRed';
+      }
+
+      tileArray[select[0]] = {
+        color: color,
         flipped: false
       };
     }
-    if (ranCol == 8) var ranCol = 9;
-    else var ranCol = 8;
-    for (i = 0; i < ranCol; i++) {
-      var ran = getRandomInt(0, unusedArray.length - 1);
-      var select = unusedArray.splice(ran, 1);
-      colorArray[select[0]] = {
-        color: 'IndianRed',
-        flipped: false
-      };
-    }
+
     var ran = getRandomInt(0, unusedArray.length - 1);
     var select = unusedArray.splice(ran, 1);
-    colorArray[select[0]] = {
+    tileArray[select[0]] = {
       color: 'DimGrey',
       flipped: false
     };
+
     unusedArray.forEach(function(val) {
-      colorArray[val] = {
+      tileArray[val] = {
         color: 'LightYellow',
         flipped: false
       };
@@ -158,21 +172,22 @@
   }
 
   function getCount() {
-    var blueCount = 0,
-      redCount = 0;
-    for (key in colorArray) {
-      if (colorArray[key].color == "LightBlue" && !colorArray[key].flipped) blueCount++;
-      if (colorArray[key].color == "IndianRed" && !colorArray[key].flipped) redCount++;
+    var blueCount = 0;
+    var redCount = 0;
+    for (id in tileArray) {
+      if (tileArray[id].color == "LightBlue" && !tileArray[id].flipped) blueCount++;
+      if (tileArray[id].color == "IndianRed" && !tileArray[id].flipped) redCount++;
     }
     $('#blueCount').text(blueCount);
     $('#redCount').text(redCount);
   }
+
   setTimeout(resize, 500);
 
   function resize() {
     $('#topBar').css('height', document.body.clientHeight * .075 + "px");
     $('#topBar *').css('line-height', $('#topBar').height() + "px");
-    $("*").css('font-size', document.body.clientWidth * .03 + "px");
+    $("*").css('font-size', document.body.clientWidth * .025 + "px");
     $("#game").css('height', document.body.clientHeight - $('#topBar').height() + "px");
     $("#game").css('top', $('#topBar').height() + "px");
     setTimeout(resize, 500);
@@ -253,7 +268,7 @@
 
 <body>
   <div id="topBar">
-    <input type="text" id="seed" onkeyup="setSeed()" placeholder="Seed..." />
+    <input type="text" id="seed" onkeyup="resetGame()" placeholder="Seed..." />
     <div id="count"><span id="blueCount"></span>&nbsp;&nbsp;&nbsp;<span id="redCount"></span></div>
     <div id="spymaster" onclick="toggleSpymaster()">Spymaster</div>
   </div>
